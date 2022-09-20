@@ -1,5 +1,13 @@
 # XTRANS
 
+## Dependencies.
+
+- trans
+- thingmenu
+- xsel,xclip
+- locale
+- xdotool
+
 ## Help
 
 xtrans

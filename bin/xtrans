@@ -72,8 +72,8 @@ xtrans_check_programs() {
     if ! which trans >/dev/null 2>&1; then
         error "Please install 'trans'."; r=1
     fi
-    if ! which 9menu >/dev/null 2>&1; then
-        error "Please install '9menu'."; r=1
+    if ! which thingmenu >/dev/null 2>&1; then
+        error "Please install 'thingmenu'."; r=1
     fi
     if ! which xsel >/dev/null 2>&1; then
         error "Please install 'xsel'."; r=1
