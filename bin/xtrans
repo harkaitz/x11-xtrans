@@ -51,7 +51,10 @@ xtrans() {
               w="`cat "${t}"`"
               xdotool set_window --name "WAIT" "$w"
               fr="`xsel -o`"
-              to="`LANG="${l}" trans -no-auto -b "${fr}" | tr -d "·"`"
+              to="`LANG="${l}" trans -no-auto -b "${fr}" | tr -d "·" | sed '\''
+              s|^"||
+              s|"$||
+              '\''`"
               if test -n "${to}"; then
                   echo -n "${to}" | xclip -selection "clipboard"
                   echo -n "${to}" | xclip -selection "primary"
