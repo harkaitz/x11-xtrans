@@ -12,12 +12,10 @@
 
 xtrans
 
-    Usage: xtrans [LANGUAGES...]
+    Usage: xtrans LANGS
     
-    This program shows a little menu using thingmenu(1) listing the specified
-    languages (es, gl, ca...). When the user clicks in one of them the
-    currently selected text is translated with trans(1) and putted back
-    in the clipboard.
+    This program shows a little button, when clicked it puts the
+    translation of the selection in the clipboard.
 
 ## Collaborating
 

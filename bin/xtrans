@@ -24,59 +24,47 @@
 #L:  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 #L:  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ##:
-#h: Usage: $0 [LANGUAGES...]
+#h: Usage: $0 LANGS
 #h:
-#h: This program shows a little menu using thingmenu(1) listing the specified
-#h: languages (es, gl, ca...). When the user clicks in one of them the
-#h: currently selected text is translated with trans(1) and putted back
-#h: in the clipboard.
+#h: This program shows a little button, when clicked it puts the
+#h: translation of the selection in the clipboard.
 ##:
-xtrans() {
-    local IFS='@' a9menu='' a='' t l fr to
-    for a in "$@"; do
-        l="`locale -a | grep "^${a}_" | head -n 1`"
-        if test ! -n "${l}"; then
-            error "Language ${a} not installed."
-            return 1
-        fi
-        a9menu="${a9menu}${a9menu:+@}${a}@echo ${l}"
-    done
-    while true; do
-        l="`thingmenu ${a9menu} exit`"
-        if test ! -n "${l}"; then
-            break
-        fi
-        t="`mktemp`"
-        t="${t}" l="${l}" thingmenu -s TRANSLATE '
-              w="`cat "${t}"`"
-              xdotool set_window --name "WAIT" "$w"
-              fr="`xsel -o`"
-              to="`LANG="${l}" trans -no-auto -b "${fr}" | tr -d "·" | sed '\''
-              s|^"||
-              s|"$||
-              '\''`"
-              if test -n "${to}"; then
-                  echo -n "${to}" | xclip -selection "clipboard"
-                  echo -n "${to}" | xclip -selection "primary"
-                  echo -n "${to}" | xclip -selection "secondary"
-                  xdotool set_window --name "XTRANS - OK" "$w"
-              else
-                  xdotool set_window --name "XTRANS - ERROR" "$w"
-              fi
-              ' &
-        sleep 1
-        w="`xdotool search --name thingmenu | tee "${t}"`"
-        xdotool set_window --name "XTRANS" $w
-        wait
-    done
-}
+xtrans() (
+    if test ! -n "$1"; then
+        set -- $XTRANS_LANGS
+    fi
+    
+    code='
+    w="`xdotool getwindowfocus`"
+    xdotool set_window --name "WAIT" "$w"
+    fr="`xsel -o`"
+    to="`trans -no-auto -b "${fr}" | tr -d "·" | sed '\''
+    s|^"||
+    s|"$||
+    '\''`"
+    if test -n "${to}"; then
+        echo "${to}"
+        echo -n "${to}" | xclip -selection "clipboard"
+        echo -n "${to}" | xclip -selection "primary"
+        echo -n "${to}" | xclip -selection "secondary"
+        xdotool set_window --name "XTRANS - OK" "$w"
+    else
+        xdotool set_window --name "XTRANS - ERROR" "$w"
+    fi
+    '
+    9menu ${1:+ "${1}:export LANG='${1}'${code}" } \
+          ${2:+ "${2}:export LANG='${2}'${code}" } \
+          ${3:+ "${3}:export LANG='${3}'${code}" } \
+          ${4:+ "${4}:export LANG='${4}'${code}" } \
+          ${5:+ "${5}:export LANG='${5}'${code}" }
+)
 xtrans_check_programs() {
     local r=0
     if ! which trans >/dev/null 2>&1; then
         error "Please install 'trans'."; r=1
     fi
-    if ! which thingmenu >/dev/null 2>&1; then
-        error "Please install 'thingmenu'."; r=1
+    if ! which 9menu >/dev/null 2>&1; then
+        error "Please install '9menu'."; r=1
     fi
     if ! which xsel >/dev/null 2>&1; then
         error "Please install 'xsel'."; r=1
@@ -98,7 +86,7 @@ xtrans_check_programs
 SCRNAME="`basename "$0"`"
 if test @"${SCRNAME}" = @"xtrans";then
     case "${1}" in
-        ''|-h|--help)
+        -h|--help)
             sed -n 's/^ *#h: \{0,1\}//p' "$0" | sed "s|\\\$0|${SCRNAME}|g"
             echo ""
             sed -n 's/^ *#l: \{0,2\}//p' "$0"
